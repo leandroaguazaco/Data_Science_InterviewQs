@@ -3,4 +3,4 @@ My practicing to get better at **data science interviews** by solving a few ques
 
 Every solved question  will present in `R Markdown` documents with RStudio and publish them via `GitHub`, using `GitHub Pages`
 
-> The results can be consulted in 
+> The results can be consulted in https://leandroaguazaco.github.io/Data_Science_InterviewQs/

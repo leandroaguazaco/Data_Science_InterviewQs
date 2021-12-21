@@ -5,8 +5,8 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
+    - text: "Question 54"
+      href: 054_Smallest_unrepresented_integer.html
 output:
   html_document:
-    theme: cosmo
+    theme: darkly

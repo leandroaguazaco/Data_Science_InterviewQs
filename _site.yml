@@ -3,7 +3,7 @@ output_dir: "docs"
 navbar:
   title: "My Website"
   left:
-    - text: "Home"
+    - text: "About"
       href: index.html
     - text: "Question 54"
       href: 054_Smallest_unrepresented_integer.html

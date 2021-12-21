@@ -1,0 +1,356 @@
+---
+title: "Data Science Interview Questions"
+knit: (function(input_file, encoding) { 
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+                    encoding = encoding,
+                    output_file = file.path('D:/Leandro/Data_Science_InterviewQs', 
+                                            out_dir, 
+                                            'index.html'))})
+subtitle: "054 - Smallest Unrepresented Integer"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+* https://www.linkedin.com/in/felipe-leandro-aguazaco/  
+* https://github.com/LeandroAguazaco  
+* leandro.aguazaco@outlook.com  
+
+# Problem 
+
+Given a sorted (in increasing order) array of positive numbers, can you find the smallest positive integer that cannot be represented as a sum of elements from the array?
+
+# Resolving Problem With R
+
+Libraries:
+
+```{r}
+
+library(tidyverse) # Includes purrr package
+library(gtools)
+library(reticulate)
+
+```
+
+Sorted (in increasing order) array of positive numbers `vector`:
+
+```{r}
+
+vector <- c(1, 3, 6, 10, 11, 15)
+
+```
+
+Combinations in R using the `gtools::combinations` package and function:
+
+```{r}
+
+combinations(n = length(vector), # Amount of elements
+             r = 3, # Selections 
+             v = vector, # Array
+             set = FALSE) 
+
+```
+
+Function that figure out the sum of all **combinations**, selecting n elements from a vector of positive integers:
+
+```{r}
+
+sum_combinations <- function(vector, n) {
+
+  sums <- combinations(n = length(vector), 
+                       r = n, 
+                       v = vector, 
+                       set = FALSE) %>% 
+    addmargins(2) %>% # Sum rows
+    data.frame() %>% 
+    select(Sum)
+  
+  return(sums)
+
+}
+
+```
+
+Applying the created function to obtain all possible numbers that can be represented as a sum of elements from the array:
+
+```{r}
+
+represented_integers <- map_dfr(.x = 1:length(vector), 
+                                .f = ~ sum_combinations(vector, 
+                                                        n = .x)) %>% 
+  arrange(Sum) %>% 
+  distinct() %>%  # Delete repeated elements
+  pull(Sum)
+  
+# Integers that can be represented as a sum of elements from the vector
+represented_integers
+
+```
+
+To obtain the minimum integer that can't be represented:
+
+```{r}
+
+# Integers that not appears in the sequence from 1 to maximum of represented numbers.
+minimum_table <- data.frame(all_numbers = seq(1, max(represented_integers))) %>% 
+  filter(!(all_numbers %in% represented_integers)) %>% 
+  slice_min(order_by = all_numbers)
+
+# Conditional selection of minimum integer if the number is between the range of represented integers or not.
+if(dim(minimum_table)[1] == 0) {
+  minimum_int <- max(represented_integers) + 1
+} else {
+  minimum_int <- minimum_table[1, 1]
+}
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r vector`] is **`r minimum_int`**.
+
+## Unique Function in R
+
+Minimum unrepresented integer function:
+
+```{r }
+
+min_unrepresented_int <- function(vector) {
+# 1.
+  sum_combinations <- function(n) {
+    sums <- combinations(n = length(vector), 
+                         r = n, 
+                         v = vector, 
+                         set = FALSE) %>% 
+      addmargins(2) %>% # Sum columns
+      data.frame() %>% 
+      select(Sum)
+    
+    return(sums)
+  }
+  
+# 2. 
+  represented_integers <- map_dfr(.x = 1:length(vector), 
+                                  .f = ~ sum_combinations(n = .x)) %>% 
+  arrange(Sum) %>% 
+  distinct() %>%  # Delete repeated elements
+  pull(Sum)
+  
+# 3. 
+  minimum_table <- data.frame(all_numbers = seq(1, max(represented_integers), 1)) %>% 
+    filter(!(all_numbers %in% represented_integers)) %>% 
+    slice_min(order_by = all_numbers)
+  
+# 4. 
+  if(dim(minimum_table)[1] == 0) {
+    minimum_int <- max(represented_integers) + 1
+  } else {
+    minimum_int <- minimum_table[1, 1]
+  }
+  
+# 5. 
+  return(minimum_int)
+}
+
+```
+
+Applying the unique R function:
+
+```{r}
+
+vector <- c(1, 3, 6, 10, 11, 15)
+
+min_unrepresented_int(vector)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r vector`] is **`r min_unrepresented_int(vector)`**.
+
+```{r}
+
+vector <- c(1, 1, 1, 1)
+
+min_unrepresented_int(vector)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r vector`] is **`r min_unrepresented_int(vector)`**.
+
+```{r}
+
+vector <- c(1, 1, 3, 4)
+
+min_unrepresented_int(vector)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r vector`] is **`r min_unrepresented_int(vector)`**.
+
+
+# Resolving Problem With Python
+
+Libraries:
+<!-- class.source = "bg-info" # change chunck background-->
+```{python}
+import pandas as pd
+import numpy as np
+import itertools
+
+```
+
+Arrays in Python:
+
+```{python}
+# Array
+array = [1, 3, 6, 10, 11, 15]
+
+# Length of array
+len(array)
+
+```
+
+Combinations in Python:
+
+```{python}
+combinations = pd.DataFrame(itertools.combinations(array, 3), 
+                            columns = ["one", "two", "three"]) # Columns names
+
+print(combinations)
+
+# Sum rows:
+combinations["sum"] = combinations.sum(1)
+# combinations["sum"] = combinations.one + combinations.two + combinations.three
+
+```
+
+Function that calculates the sum of all possible combinations selecting *n* elements from an array:
+
+```{python}
+def sum_combinations(array, n):
+  
+  combinations = pd.DataFrame(list(itertools.combinations(array, 3))).sum(1)
+  
+  return combinations.sum(1)
+  
+```
+
+Using `map` function to apply a function to an iterable object like arrays:
+
+```{python}
+represented_int = list(map(lambda n:
+  pd.DataFrame(itertools.combinations(array, n)).sum(1), # Combinations Sum
+  list(np.arange(1, len(array) + 1)))) # Iterable object, arguments for the lambda function
+# Return a list of series
+
+represented_int = pd.concat(represented_int, 0) # Concatenate Series by rows
+
+represented_int = represented_int.drop_duplicates().sort_values() # Drop duplicates and sort elements
+
+# represented_int.index = np.arange(0, len(represented_int), 1) # Replace indexes of a serie
+
+type(represented_int) # Type of object
+# dir(represented_int) # Attributes of the given object
+
+```
+
+To obtain the minimum integer that can't be represented:
+
+```{python}
+all_numbers = np.arange(1, represented_int.max() + 1)
+
+# All elements that are in all_numbers but not represented_int
+diff_int = list(set(all_numbers).difference(set(represented_int)))
+
+# Conditional selection
+
+if len(diff_int) != 0:
+  minimum_int = min(diff_int)
+else:
+  minimum_int = represented_int.max() + 1
+
+print(minimum_int)
+
+```
+
+## Unique Function in Python
+
+```{python}
+def min_unrepresented_int(array):
+  # 1. 
+  represented_int = list(map(lambda n:
+    pd.DataFrame(itertools.combinations(array, n)).sum(1),
+    list(np.arange(1, len(array) + 1)))) 
+  
+  represented_int = pd.concat(represented_int, 0)
+  
+  represented_int = represented_int.drop_duplicates().sort_values()
+  
+  # 2. 
+  all_numbers = np.arange(1, represented_int.max() + 1)
+  
+  diff_int = list(set(all_numbers).difference(set(represented_int)))
+  
+  # 3.
+  if len(diff_int) != 0:
+    minimum_int = min(diff_int)
+  else:
+    minimum_int = represented_int.max() + 1 
+  
+  # 4.
+  return minimum_int
+```
+
+Applying the unique Python function:
+
+```{python}
+integers = [1, 3, 6, 10, 11, 15]
+
+min_unrepresented_int(integers)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r py$integers`] is **`r py$min_unrepresented_int(py$integers)`**.
+
+```{python}
+integers = [1, 1, 1, 1]
+
+min_unrepresented_int(integers)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r py$integers`] is **`r py$min_unrepresented_int(py$integers)`**.
+
+```{python}
+integers = [1, 1, 3, 4]
+
+min_unrepresented_int(integers)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r py$integers`] is **`r py$min_unrepresented_int(py$integers)`**.
+
+```{python}
+integers = [15, 30, 45, 50]
+
+min_unrepresented_int(integers)
+
+```
+
+The smallest positive integer that cannot be represented as a sum of elements from the array [`r py$integers`] is **`r py$min_unrepresented_int(py$integers)`**.

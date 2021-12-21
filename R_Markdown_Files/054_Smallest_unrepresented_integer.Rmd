@@ -1,5 +1,12 @@
 ---
 title: "Data Science Interview Questions"
+knit: (function(input_file, encoding) { 
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+                    encoding = encoding,
+                    output_file = file.path('D:/Leandro/Data_Science_InterviewQs', 
+                                            out_dir, 
+                                            'index.html'))})
 subtitle: "054 - Smallest Unrepresented Integer"
 author: "Felipe Leandro Aguazaco"
 date: "`r Sys.Date()`"

@@ -5,8 +5,7 @@ knit: (function(input_file, encoding) {
   rmarkdown::render(input_file,
                     encoding = encoding,
                     output_file = file.path('D:/Leandro/Data_Science_InterviewQs', 
-                                            out_dir, 
-                                            'index.html'))})
+                                            out_dir,                               '054_Smallest_unrepresented_integer.html'))})
 author: "Felipe Leandro Aguazaco"
 date: "`r Sys.Date()`"
 output: 
@@ -29,10 +28,6 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.align = "center", 
                       dev = "png")
 ```
-
-* https://www.linkedin.com/in/felipe-leandro-aguazaco/  
-* https://github.com/LeandroAguazaco  
-* leandro.aguazaco@outlook.com  
 
 # Problem 
 

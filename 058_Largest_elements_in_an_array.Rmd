@@ -1,5 +1,12 @@
 ---
 title: "58 - Largest Elements in an Array"
+knit: (function(input_file, encoding) { 
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+                    encoding = encoding,
+                    output_file = file.path('D:/Leandro/Data_Science_InterviewQs',
+                    out_dir,
+                    '058_Largest_elements_in_an_array.html'))})
 author: "Felipe Leandro Aguazaco"
 date: "`r Sys.Date()`"
 output: 

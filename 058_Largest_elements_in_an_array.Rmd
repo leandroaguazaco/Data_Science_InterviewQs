@@ -1,0 +1,103 @@
+---
+title: "58 - Largest Elements in an Array"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+# Problem
+
+---
+
+Given an array with k distinct elements, write a function to return all elements that have at least two elements greater than themselves in the same array. For example, given the following array **[2, 3, 9, 7, 6]**, your function should return **[2, 3, 6]**. 
+    
+# Resolving Problem {.tabset .tabset-fade .tabset-pills}
+
+---
+## In R
+
+```{r}
+
+library(tidyverse) # Includes purrr package
+library(reticulate) # Interface to Python
+
+vector <- c(2, 3, 9, 7, 6)
+
+min_elem_r <- function(vector) {
+  aux <- c() # auxiliary vector 
+  
+  for (i in 1:length(vector)) {
+    comp <- sum(vector[i] < vector[-i]) # amount of elements greater than i
+    if (comp >= 2) {
+      aux[length(aux) + 1] <- vector[i] 
+    }
+  }
+  
+  return(aux)
+}
+
+# Applying R function
+min_elem_r(vector)
+
+```
+
+## In Python
+
+<!-- class.source = "bg-info" # change chunk background color -->
+
+```{python}
+import numpy as np
+
+# Accessing an R object in Python
+# r.vector = [2, 3, 9, 7, 6]
+np.array(r.vector) 
+
+array = np.array([2, 3, 9, 7, 6])
+
+# List comprehension
+def min_elem_py(array):
+  return [array[i] for i in range(0, len(array)) if sum(array[i] < array) >= 2]
+
+# Applying Python function
+min_elem_py(array)
+
+```
+
+## Example in Python
+
+```{python}
+array = np.array([1, 4, 7, 8, 11, 15, 30])
+
+min_elem_py(array)
+
+```
+
+## Example in R
+
+```{r}
+
+# Accessing an Python object in R
+vector <- py$array
+
+min_elem_r(vector)
+
+```
+

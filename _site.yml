@@ -1,12 +1,14 @@
 name: "my-website"
 output_dir: "docs"
 navbar:
-  title: "Data Science Interview Questions"
+  title: "DS InterviewQs"
   left:
     - text: "About"
       href: index.html
-    - text: "Question 54"
-      href: 054_Smallest_unrepresented_integer.html
+    - text: "Menu"
+      menu:
+        - text: "Question 54"
+          href: 054_Smallest_unrepresented_integer.html
 output:
   html_document:
     theme: darkly

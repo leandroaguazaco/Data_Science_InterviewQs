@@ -1,0 +1,171 @@
+---
+title: "60 - Analyzing employee data"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+# Problem
+
+---
+
+Below is a snippet from a table that contains information about employees that work at Company XYZ: 
+
+| Column name       | Data type | Example value | Description                                           |
+|-------------------|-----------|---------------|-------------------------------------------------------|
+| employee_name     | string    | Cindy         | Name of employee                                      |
+| employee_id       | integer   | 1837204       | Unique id for each employee                           |
+| yrs_of_experience | integer   | 14            | total working years of experience                     |
+| yrs_at_company    | integer   | 10            | total working years at Company XYZ                    |
+| compensation      | integer   | 100000        | dollar value of employee compensation                 |
+| career_track      | string    | technical     | Potential values: technical, non-technical, executive |
+
+Company XYZ Human Resource department is trying to understand compensation across the company and asked you to pull data to help them make a decision regarding employee compensation.   
+
+Can you pull the average, median, minimum, maximum, and standard deviations for salary across 5 year experience buckets at Company XYZ? (e.g. get the corresponding average, median, minimum, maximum, and standard deviations for experience buckets 0-5, 5-10, 10-15, etc.) You can assume the data is imported into a dataframe named, df.  
+
+# Resolving Problem {.tabset .tabset-fade .tabset-pills}
+
+---
+
+## In Python 
+
+Libraries:
+
+```{python}
+import pandas as pd
+import numpy as np
+
+```
+
+Example data:
+
+```{python}
+
+df = pd.DataFrame({'employee_name': ["Cindy", "Leandro", "Cristian", "Felipe", "Marina", "Luz", "Daniel", "Joseph", "Charles", "Tom"], 
+                   'employee_id': list(range(1, 11, 1)), 
+                   'yrs_of_experience': [4, 3, 5, 7, 8, 6, 10, 11, 20, 21], 
+                   'yrs_at_company': [1, 2, 2, 1, 4, 4, 3, 3, 5, 6], 
+                   'compensation': [100000, 100000, 150000, 150000, 230000, 134000, 456000, 321000, 123000, 123000], 
+                   'career_track': ["technical" for i in range(1, 5)] + ["non-technical" for i in range(1, 5)] + ["executive" for i in range(1, 3)]})
+
+df.info()
+df.describe()
+
+```
+
+Discretize experience variable using `cut` function from `pandas` library:
+
+```{python}
+df['interval'] = pd.cut(x = df.yrs_of_experience, 
+                        bins = range(0, 30, 5), # Interval limits
+                        right = True)
+```
+
+Group by and aggregate functions using `pandas`:
+
+```{python}
+df.groupby(by = "interval") \
+  .agg(func = ["count", "mean", "median", "min", "max", "std"]) \
+  .round(decimals = 2)["compensation"]
+
+```
+
+## In R
+
+Libraries:
+
+```{r}
+library(tidyverse)
+library(reticulate)
+```
+
+Creating data frame in R:
+
+```{r}
+
+df_in_R <- data.frame(employee_name =  c("Cindy", "Leandro", "Cristian", "Felipe", "Marina", "Luz", "Daniel", "Joseph", "Charles", "Tom"),
+                      employee_id= seq(1, 10, 1), 
+                      yrs_of_experience = c(4, 3, 5, 7, 8, 6, 10, 11, 20, 21),
+                      yrs_at_company = c(1, 2, 2, 1, 4, 4, 3, 3, 5, 6), 
+                      compensation = c(100000, 100000, 150000, 150000, 230000, 134000, 456000, 321000, 123000, 123000), 
+                      career_track = c(rep("technical", 4), rep("non-technical", 4), rep("executive", 2) ))
+
+str(df_in_R)
+summary(df_in_R)
+
+```
+
+Group by and aggregate functions using `dplyr`:
+
+```{r}
+
+df_in_R %>% 
+  mutate(interval = cut(x = yrs_of_experience, 
+                        breaks = seq(0, 30, 5), 
+                        right = TRUE)) %>% 
+  group_by(interval) %>% 
+  summarize(count = n(), 
+            mean = mean(compensation), 
+            median = median(compensation), 
+            min = min(compensation), 
+            max = max(compensation), 
+            std = sd(compensation)) %>% 
+  ungroup()
+
+```
+# R verbs in Python
+
+Dplyr verbs in Python using the `siuba` package.
+
+Libraries:
+
+
+```{python message = FALSE}
+# siuba Package:
+from siuba import _, group_by, summarize
+```
+
+Importing data from R in Python:
+
+```{python}
+data = pd.DataFrame(df)
+
+data.info()
+data.describe()
+
+```
+
+```{python}
+(data >> 
+  group_by(_.interval) >> 
+  summarize(mean   = np.mean(_.compensation),
+            median = (_.compensation).median(), # np.median()
+            min = np.min(_.compensation), 
+            max = np.max(_.compensation), 
+            std = np.std(_.compensation))
+  )
+
+```
+
+
+
+

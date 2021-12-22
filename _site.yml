@@ -7,8 +7,6 @@ navbar:
       href: index.html
     - text: "Menu"
       menu:
-        - text: "Question 58"
-          href: 058_Largest_elements_in_an_array.html
         - text: "Question 54"
           href: 054_Smallest_unrepresented_integer.html
 output:

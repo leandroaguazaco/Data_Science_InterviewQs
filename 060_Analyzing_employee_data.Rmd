@@ -1,5 +1,5 @@
 ---
-title: "60 - Analyzing employee data"
+title: "60 - Analyzing Employee Data"
 author: "Felipe Leandro Aguazaco"
 date: "`r Sys.Date()`"
 output: 
@@ -138,15 +138,14 @@ Dplyr verbs in Python using the `siuba` package.
 
 Libraries:
 
-
-```{python message = FALSE}
+```{python message = FALSE, eval = FALSE}
 # siuba Package:
 from siuba import _, group_by, summarize
 ```
 
 Importing data from R in Python:
 
-```{python}
+```{python eval = FALSE}
 data = pd.DataFrame(df)
 
 data.info()
@@ -154,7 +153,7 @@ data.describe()
 
 ```
 
-```{python}
+```{python eval = FALSE}
 (data >> 
   group_by(_.interval) >> 
   summarize(mean   = np.mean(_.compensation),

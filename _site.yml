@@ -7,6 +7,8 @@ navbar:
       href: index.html
     - text: "Menu"
       menu:
+        - text: "Question 61"
+          href: 061_-Joining_to_Get_total_sales_a_SQL_problem.html
         - text: "Question 60"
           href: 060_Analyzing_employee_data.html
         - text: "Question 59"

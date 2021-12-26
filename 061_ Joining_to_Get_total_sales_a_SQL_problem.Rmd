@@ -1,0 +1,255 @@
+---
+title: "61 - Joining to Get Total Sales, a SQL Problem"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+# Problem
+
+---
+
+Suppose you have two tables, one called 'orders', and one called 'revenue', as shown below: 
+
+* Orders table:
+```{r echo = FALSE}
+
+library(tidyverse)
+library(gt)
+library(kableExtra)
+
+
+orders <- data.frame(
+  orders_id = seq(1, 6), 
+  channel = c("Online", "Online", "In_Store", "In_Store", "Online", "Online"), 
+  date = c("2018-09-01", "2018-09-03", "2018-10-11", "2018-08-21", "2018-08-13", "2018-10-29"), 
+  month = c("September", "September", "October", "August", "August", "October")
+)
+
+
+#gt(orders) %>% 
+  # tab_header(title = html("Tabla Información General")) %>% 
+#  tab_style(style = list(cell_text(size = "medium", 
+#                                   align = "center", 
+#                                   v_align = "middle")),
+#                         #cell_fill(color = "gray", alpha = 0.8)), 
+#            locations = cells_body(columns = everything()))
+
+orders %>% 
+  kbl(align = "c", 
+      col.names = c("Order Id", "Channel", "Date",  "Month")) %>%
+  # kable_material(c("striped", "hover"), )
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "hover"))
+  # scroll_box(width = "100%", height = "200px")
+
+```
+* Revenue table:
+```{r echo = FALSE}
+
+revenue <- data.frame(order_id = seq(1, 6), 
+                      revenue = c(100, 125, 200, 80, 200, 100))
+
+revenue %>% 
+  kbl(align = "c", 
+      col.names = c("Order Id", "Revenue")) %>%
+  # kable_material(c("striped", "hover"), )
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "hover"))
+  # scroll_box(width = "100%", height = "200px")
+
+```
+<!--
+| order_id | channel  | date       | month     |
+|----------|----------|------------|-----------|
+| 1        | Online   | 2018-09-01 | September |
+| 2        | Online   | 2018-09-03 | September |
+| 3        | In_store | 2018-10-11 | October   |
+| 4        | In_store | 2018-08-21 | August    |
+| 5        | Online   | 2018-08-13 | August    |
+| 6        | Online   | 2018-10-29 | October   |
+
+* Revenue table:
+
+| order_id | revenue |
+|----------|---------|
+| 1        | 100     |
+| 2        | 125     |
+| 3        | 200     |
+| 4        | 80      |
+| 5        | 200     |
+| 6        | 100     |
+
+-->
+
+Using SQL, write a query to show the total revenue by channel for the months of September and October.
+
+# DB in PostgreSQL 
+
+---
+
+Connecting a database in PostgreSQL to R.  
+
+1. Libraries:
+
+```{r}
+
+library(DBI)
+library(RPostgres)
+
+```
+
+2. Connection:
+
+```{r}
+
+question_61_db <- dbConnect(drv = Postgres(), 
+                            dbname = "InterviewQs", 
+                            host = "localhost", 
+                            user = "postgres", 
+                            password = Sys.getenv("PostgreSQL_Password"), 
+                            bigint = "integer")
+
+```
+
+3. Connecting test:
+
+```{r}
+# Set schema
+dbGetQuery(conn = question_61_db, 
+           "SET SEARCH_PATH = question_61")
+
+# Tables in data base
+dbListTables(conn = question_61_db)
+
+# Fields in a table
+dbListFields(conn = question_61_db, 
+             name = "orders")
+
+# A simple query
+dbGetQuery(conn = question_61_db, 
+           "SELECT *
+            FROM orders;")
+
+```
+# Solving the Problem {.tabset .tabset-fade .tabset-pills}
+
+---
+
+## In SQL
+
+```{sql connection = question_61_db}
+SELECT channel, 
+       month,
+       SUM(revenue) AS total_revunue
+FROM orders
+INNER JOIN revenue
+  USING(order_id)
+WHERE month !~ 'August'
+GROUP BY channel, month
+ORDER BY channel, month;
+
+```
+## In R
+
+```{r}
+
+library(dtplyr) # Database manipulation by data.table engine
+library(tidyverse)
+
+```
+
+```{r}
+
+answer_ques61 <- 
+tbl(src = question_61_db, 
+    "orders") %>% 
+  lazy_dt() %>% 
+  inner_join(y = tbl(src = question_61_db, 
+                     "revenue") %>% 
+               lazy_dt(), 
+             by = "order_id") %>% 
+  filter(month != "August") %>% 
+  group_by(channel, month) %>% 
+  summarize(total_revenue = sum(revenue)) %>% 
+  ungroup() %>% 
+  arrange(month, channel) %>% 
+  collect()
+
+```
+
+```{r echo = FALSE}
+
+library(kableExtra)
+
+answer_ques61 %>% 
+  kbl(align = "c", 
+      col.names = c("Channel", "Month", "Total Revenue")) %>%
+  # kable_material(c("striped", "hover"), )
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "hover"))
+  # scroll_box(width = "100%", height = "200px")
+
+```
+
+## In Python
+
+```{r echo = FALSE}
+
+library(reticulate)
+
+orders <- tbl(src = question_61_db, 
+              "orders") %>% 
+  collect()
+
+revenue <- tbl(src = question_61_db, 
+              "revenue") %>% 
+  collect()
+
+```
+
+Data:
+
+```{python}
+import pandas as pd
+
+# Importing R object to Python
+orders_py = r.orders
+revenue_py = r.revenue
+
+answer_ques61_py = pd.merge(left = orders_py, 
+                            right = revenue_py, 
+                            how = "inner", 
+                            on = "order_id")
+
+```
+
+```{python}
+answer_py = answer_ques61_py \
+              .query("month != 'August'") \
+              .groupby(by = ['channel', 'month']) \
+              .agg(total_revenue = ('revenue', 'sum'))
+
+print(answer_py)
+
+```
+

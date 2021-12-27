@@ -1,0 +1,90 @@
+---
+title: "62 - Maximum of Subarrays"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+# Problem
+
+---
+
+Given an **array** and an integer **A**, find the maximum for each contiguous subarray of size **A**.
+
+* Input: array = [1, 2, 3, 1, 4, 5, 2, 3, 6], 
+  * A = 3
+* Output: 3 3 4 5 5 5 6
+
+Below is a more detailed walkthrough of what you should be trying to code, using the example above:
+
+1. subarray 1 = [<span style = "color:blue">1, 2, 3</span>, 1, 4, 5, 2, 3, 6]  
+1.1. maximum of subarray 1 = <span style = "color:green">3</span>
+2. subarray 2 = [1,<span style = "color:blue">2, 3, 1</span>, 4, 5, 2, 3, 6]  
+2.1. maximum of subarray 2 = <span style = "color:green">3</span>  
+3. subarray 3 = [1, 2, <span style = "color:blue">3, 1, 4</span>, 5, 2, 3, 6]  
+3.1. maximum of subarray 3 = <span style = "color:green">4</span>  
+4. Etc.  
+
+# Solving Problem with Python
+
+---
+
+```{python echo = FALSE}
+import pandas as pd
+import numpy as np
+```
+
+```{python}
+# Data
+array = [1, 2, 3, 1, 4, 5, 2, 3, 6]
+a = 3
+
+# List comprehension: upper limit excluded
+[max(array[i:i + a]) for i in range(0, len(array) - a + 1)]
+
+```
+
+# Unique Function
+
+```{python}
+def max_subarray(array, a):
+  return [max(array[i:i + a]) for i in range(0, len(array) - a + 1)]
+
+```
+
+## Example
+
+```{python}
+array_1 = [2, 4, 6, 3, 10, 7]
+a = 3
+
+max_subarray(array_1, a)
+
+array_2 = [1, 5, 7, 8, 4, 8, 3, 10, 15, 67, 8, 0, 1]
+a = 4
+
+max_subarray(array_2, a)
+
+```
+
+
+

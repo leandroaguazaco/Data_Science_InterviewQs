@@ -1,0 +1,128 @@
+---
+title: "63 - Christmas M&Ms"
+author: "Felipe Leandro Aguazaco"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.align = "center", 
+                      dev = "png")
+```
+
+# Problem
+
+---
+
+Suppose you have two different bags of M&Ms, one is a special Christmas edition while the other is a standard bag of M&Ms. The Christmas edition contains only red, green, and white M&Ms while the standard bag contains the full color offering. The distributions of drawing a given color are below:
+
+* Christmas bag of M&Ms:   
+  * Green: 30%  
+  * Red: 40%  
+  * White: 30%  
+\
+* Standard bag of M&Ms:
+  * Green: 20%
+  * Orange: 19%
+  * Blue: 19%
+  * Red: 15%
+  * Yellow: 14%
+  * Brown: 13%
+
+You are given an M&M from each bag, but you do not know which M&M came from which bag. One M&M is Red and one is Green. What is the probability that the Red M&M came from the Standard bag?
+
+# Solving Problem 
+
+---
+
+## Baye's Theorem
+
+In statistics and probability theory, the Bayes’ theorem (also known as the Bayes’ rule) is a mathematical formula used to determine the conditional probability of events. Essentially, the Bayes’ theorem describes the probability of an event based on prior knowledge of the conditions that might be relevant to the event.^[https://corporatefinanceinstitute.com/resources/knowledge/other/bayes-theorem/]
+
+$$
+P(A \mid B)=\frac{P(B \mid A) \cdot P(A)}{P(B)}
+$$
+
+* Event A = Red M&M
+* Event B = Standard Bag
+* P(A) = (0.5 * 0.4) + (0.5 * 0.15) = 0.275
+* P(B) = 0.5
+
+<p style="text-align: center;">
+P(Red M&M \\Standard Bag) = 0.15 * 0.275 / 0.5 = 0.0825 
+</p>
+
+The probability that the Red M&M came from the Standard bag is **0.0825**.
+
+<!--
+
+## Monte Carlo Simulation. 
+
+0. Libraries:
+
+```{r}
+library(tidyverse)
+```
+
+1. Data and objects:
+
+```{r}
+# Bagas
+bags <- c("Christmas", "Standard")
+# Christmas bag of M&Ms
+christmas <- c(rep("green", 30),  rep("red", 40), rep("white", 30))
+# Standard bag of M&Ms
+standard <- c(rep("green", 20),  rep("orange", 19), rep("blue", 19), rep("red", 15), rep("yellow", 14), rep("brown", 13))
+
+```
+
+2. Simulation function:
+
+```{r}
+
+simulation <- function(n) {
+  results <- replicate(n, {
+    standard_bag <- sample(x = standard, 
+                           size = 1)
+    christmas_bag <- sample(x = christmas, 
+                            size = 1)
+    paste0(standard_bag, ", ", christmas_bag)
+  })
+
+  results <- data.frame(results)
+  
+  return(results)
+}
+
+```
+
+3. Results:
+
+```{r}
+
+exper_results <- simulation(n = 100000)
+
+exper_results %>% 
+  filter(results %in% c("green, red", "red, green")) %>% 
+  separate(col = results, 
+           into = c("standard_bag", "christmas_bag"), 
+           sep = ",") %>% 
+  filter(standard_bag == "red") %>% 
+  nrow()
+
+```
+-->

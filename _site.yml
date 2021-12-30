@@ -7,6 +7,8 @@ navbar:
       href: index.html
     - text: "Menu"
       menu:
+        - text: "Question 63"
+          href: 063_Christmas_M-Ms.html
         - text: "Question 62"
           href: 062_Maximum_of_subarrays.html
         - text: "Question 61"

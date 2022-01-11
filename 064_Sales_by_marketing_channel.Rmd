@@ -12,15 +12,19 @@ output:
     toc_float:
       collapsed: false
       smooth_scroll: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE,
-                      cache = TRUE,
+                      #cache = TRUE,
                       warning = FALSE, 
                       message = FALSE, 
                       fig.align = "center", 
+                      #fig.width = 4, 
+                      #fig.height = 4,
                       dev = "png")
 ```
 
@@ -29,3 +33,177 @@ knitr::opts_chunk$set(echo = TRUE,
 ---
 
 Given the following [data set](https://docs.google.com/spreadsheets/d/1s_gYPvxtgO9ufb-q2TO4n9_TCe7I-RorkbDYYegMm4c/edit#gid=33674467), can you plot a chart that shows the percent of revenue by marketing source? You can assume that purchase_value is revenue in this case, and you'll have to calculate the percent of revenue by source prior to plotting.
+
+# Data
+
+---
+
+Libraries: 
+
+```{r }
+
+library(tidyverse)
+library(dtplyr)
+library(gsheet) # Read Google sheets
+library(DataExplorer)
+library(skimr)
+library(viridis)
+library(plotly)
+library(htmltools)
+library(reticulate)
+
+```
+Load data:
+```{r}
+
+data <- gsheet2tbl(url = "https://docs.google.com/spreadsheets/d/1s_gYPvxtgO9ufb-q2TO4n9_TCe7I-RorkbDYYegMm4c/edit#gid=33674467") %>% 
+  tibble()
+
+# Original data structure
+str(data)
+
+# Data Cleaning
+data <- data %>% 
+  mutate(across(.cols = c(2:3), 
+                .fns = as.POSIXct)) %>% 
+  mutate(across(.cols = c(6:8, 11), 
+                .fns = as.factor))
+
+```
+
+# Data Exploratory Analysis
+
+---
+
+Summary:
+
+```{r}
+
+skim(data = data)
+
+```
+
+Graphs:
+
+```{r}
+
+# Final structure
+str(data)
+
+# Types of variables
+data %>% 
+  plot_intro(ggtheme = theme_bw())
+
+# Percentage of missing values by variable
+data %>% 
+  plot_missing(ggtheme = theme_bw(), 
+               theme_config = theme(legend.position = "none"))
+
+# Distribution: histograms
+data %>% 
+  select_if(is.numeric) %>% # Not necessary
+  select(-c(ip_address, user_id)) %>% 
+  plot_histogram(geom_histogram_args = list(color = "black"), 
+                 title = "Distribution Quantitative Variables", 
+                 ggtheme = theme_bw(), 
+                 ncol = 2,
+                 theme_config = theme(plot.title = element_text(hjust = 0.5, 
+                                                                face = "bold"), 
+                                      axis.title.x = element_text(face = "plain"),
+                                      axis.title.y = element_text(face = "plain")))
+
+# Frecuency: barplots
+data %>% 
+  plot_bar(ggtheme = theme_bw(), 
+           theme_config = theme(axis.text.x = element_text(size = 6.5)))
+
+```
+
+# Resolving in R
+
+---
+
+```{r}
+
+div(
+  ggplotly(
+    data %>% 
+    group_by(source) %>% 
+    summarize(revenue = sum(purchase_value)) %>% 
+    mutate(rev_percentage = round(revenue / sum(revenue) * 100, 
+                                  digits = 2)) %>% 
+    mutate(source = reorder(x = source, 
+                            X = rev_percentage, 
+                            FUN = min)) %>%
+    ungroup() %>% 
+    ggplot(mapping = aes(x = source, 
+                         y = rev_percentage)) + 
+      geom_col(width = 0.65, 
+               colour = "black", 
+               fill =  viridis::viridis(n = 3, 
+                                        option = "E")) +
+      labs(title = "Percent of Revenue by Marketing Source", 
+           x = "Marketing Source", 
+           y = "Percent of Revenue") + 
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5))
+  ), 
+align = "center")
+  
+```
+# Resolving in Python
+
+---
+
+Importing data from R object to Python:
+
+```{python}
+data_python = r.data
+
+data_python.dtypes
+
+```
+
+Aggregate data:
+
+```{python}
+import pandas as pd
+
+# Problem
+data_agg = data_python \
+  .groupby(by = 'source', 
+           as_index = False, 
+           sort = False) \
+  .agg(total_revenue = ('purchase_value', 'sum'))
+
+data_agg['percent_revenue'] = round(data_agg.total_revenue / sum(data_agg.total_revenue) * 100, 2)
+
+data_agg.dtypes
+
+print(data_agg)
+
+```
+
+Graph:
+
+```{python}
+import plotly.express as px
+
+fig = px.bar(data_agg, 
+             x = 'source', 
+             y = 'percent_revenue', 
+             #height = 100, 
+             #width = 100, 
+             title = 'Percent of Revenue by Marketing Source',
+             labels = {'source': 'Marketing Source',
+             'percent_revenue': 'Percent of Revenue'}, 
+             color = ["red", "gray", "blue"],
+             color_discrete_map = "identity")
+
+fig.show()
+
+```
+
+
+
+
